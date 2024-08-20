@@ -1,0 +1,11 @@
+services:
+  network_monitor:
+    build: .
+    network_mode: host
+    volumes:
+      - ./config.yml:/app/config.yml
+      - ./logs:/app/logs
+    restart: always
+
+volumes:
+  logs: {}
