@@ -13,8 +13,8 @@ RUN git clone https://github.com/Willmo103/FlattenCodeBase.git .
 # Restore dependencies
 RUN dotnet restore
 
-# Publish the application
-RUN dotnet publish -c Release -o out
+# Build the application
+RUN dotnet build -c Release -o out
 
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/runtime:8.0

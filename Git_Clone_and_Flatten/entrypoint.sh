@@ -16,7 +16,7 @@ if [ "$COMPRESS" = "true" ]; then
 fi
 
 # Run the CodeFlattener
-dotnet CodeFlattener.dll /tmp/repo /app/output.md $COMPRESS_FLAG
+dotnet /app/CodeFlattener.dll /tmp/repo /app/output.md $COMPRESS_FLAG
 
 # Check if the output file was created
 if [ -f /app/output.md ]; then
