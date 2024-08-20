@@ -7,8 +7,13 @@ from datetime import datetime, timedelta
 from requests.exceptions import RequestException
 import ipaddress
 import socket
+import os
 
 # Set up logging
+if not os.path.exists('/app/logs/network_monitor.log'):
+    with open('/app/logs/network_monitor.log', 'w') as f:
+        f.write("*****************\n")
+
 logging.basicConfig(filename='/app/logs/network_monitor.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
