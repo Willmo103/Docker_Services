@@ -15,12 +15,17 @@ if [ "$COMPRESS" = "true" ]; then
     COMPRESS_FLAG="-c"
 fi
 
+ls /app
+
+# Make sure CodeFlattener is executable
+chmod +x /app/CodeFlattener
+
 # Run the CodeFlattener
-dotnet /app/CodeFlattener.dll /tmp/repo /app/output.md $COMPRESS_FLAG
+/app/CodeFlattener /tmp/repo /output/output.md $COMPRESS_FLAG
 
 # Check if the output file was created
-if [ -f /app/output.md ]; then
-    echo "Repository flattened successfully. Output saved to /app/output.md"
+if [ -f /output/output.md ]; then
+    echo "Repository flattened successfully. Output saved to /output/output.md"
     if [ "$COMPRESS" = "true" ]; then
         echo "Compression was applied."
     fi
