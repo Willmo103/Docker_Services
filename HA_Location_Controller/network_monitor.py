@@ -142,8 +142,7 @@ def main():
                 interval = get_interval(target, default_interval)
                 next_checks[target["name"]] = now + interval
                 logging.info(
-                    f"Next check for {target['name']} scheduled for {
-                        next_checks[target['name']]}"
+                    f"Next check for {target['name']} scheduled for {next_checks[target['name']]}"  # noqa: E501
                 )
 
         # Sleep for a short time before checking again
