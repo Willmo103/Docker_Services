@@ -1,0 +1,38 @@
+# config.yml
+default_check_interval:
+  minutes: 2
+
+discovery:
+  enabled: true
+  interval:
+    hours: 6
+  ip_ranges:
+    - start: "192.168.1.1"
+      end: "192.168.1.254"
+
+home_assistant:
+  url: "http://your-home-assistant-url:8123"
+  token: "your_long_lived_access_token_here"
+
+targets:
+  - name: "Local Router"
+    type: "ping"
+    host: "192.168.1.1"
+    entity_id: "binary_sensor.local_router"
+    check_interval:
+      minutes: 1
+
+  - name: "Google"
+    type: "http"
+    url: "https://www.google.com"
+    entity_id: "binary_sensor.google_status"
+
+  - name: "Local Web Server"
+    type: "http"
+    url: "http://192.168.1.100"
+    error_content: "Error 500"
+    entity_id: "binary_sensor.local_web_server"
+    check_interval:
+      hours: 1
+
+# Discovered hosts will be added here automatically

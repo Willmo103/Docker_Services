@@ -92,7 +92,7 @@ def update_config(config, discovered_hosts):
     if new_hosts:
         config['targets'].extend(new_hosts)
         with open('/app/config.yml', 'w') as config_file:
-            yaml.dump(config, config_file)
+            yaml.dump(config, config_file, line_break="\n\n")
         logging.info(f"Added {len(new_hosts)} new hosts to the configuration")
 
 
