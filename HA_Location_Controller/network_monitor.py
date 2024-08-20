@@ -10,12 +10,15 @@ import socket
 import os
 
 # Set up logging
-if not os.path.exists('/app/logs/network_monitor.log'):
-    with open('/app/logs/network_monitor.log', 'w') as f:
+if not os.path.exists("/app/logs/network_monitor.log"):
+    with open("/app/logs/network_monitor.log", "w") as f:
         f.write("*****************\n")
 
-logging.basicConfig(filename='/app/logs/network_monitor.log', level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    filename="/app/logs/network_monitor.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+)
 
 
 def ping(host):
@@ -55,23 +58,23 @@ def update_home_assistant(ha_config, entity_id, state):
 
 
 def check_target(target):
-    if target['type'] == 'ping':
-        return ping(target['host'])
-    elif target['type'] == 'http':
-        return check_http(target['url'], target.get('error_content'))
+    if target["type"] == "ping":
+        return ping(target["host"])
+    elif target["type"] == "http":
+        return check_http(target["url"], target.get("error_content"))
 
 
 def get_interval(target, default_interval):
-    if 'check_interval' in target:
-        return timedelta(**target['check_interval'])
+    if "check_interval" in target:
+        return timedelta(**target["check_interval"])
     return default_interval
 
 
 def discover_hosts(ip_ranges):
     discovered_hosts = []
     for ip_range in ip_ranges:
-        start_ip = ipaddress.ip_address(ip_range['start'])
-        end_ip = ipaddress.ip_address(ip_range['end'])
+        start_ip = ipaddress.ip_address(ip_range["start"])
+        end_ip = ipaddress.ip_address(ip_range["end"])
         for ip in range(int(start_ip), int(end_ip) + 1):
             host = str(ipaddress.ip_address(ip))
             if ping(host):
@@ -79,59 +82,69 @@ def discover_hosts(ip_ranges):
                     hostname = socket.gethostbyaddr(host)[0]
                 except socket.herror:
                     hostname = host
-                discovered_hosts.append({
-                    'name': f"Discovered {hostname}",
-                    'type': 'ping',
-                    'host': host,
-                    'entity_id': f"binary_sensor.discovered_{host.replace('.', '_')}"
-                })
+                discovered_hosts.append(
+                    {
+                        "name": f"Discovered {hostname}",
+                        "type": "ping",
+                        "host": host,
+                        "entity_id": f"binary_sensor.discovered_{host.replace('.', '_')}",  # noqa: E501
+                    }
+                )
     return discovered_hosts
 
 
 def update_config(config, discovered_hosts):
-    existing_hosts = {target['host']
-                      for target in config['targets'] if 'host' in target}
-    new_hosts = [host for host in discovered_hosts if host['host']
-                 not in existing_hosts]
+    existing_hosts = {
+        target["host"] for target in config["targets"] if "host" in target
+    }
+    new_hosts = [
+        host for host in discovered_hosts if host["host"] not in existing_hosts
+    ]
 
     if new_hosts:
-        config['targets'].extend(new_hosts)
-        with open('/app/config.yml', 'w') as config_file:
+        config["targets"].extend(new_hosts)
+        with open("/app/config.yml", "w") as config_file:
             yaml.dump(config, config_file, line_break="\n\n")
         logging.info(f"Added {len(new_hosts)} new hosts to the configuration")
 
 
 def main():
-    with open('/app/config.yml', 'r') as config_file:
+    with open("/app/config.yml", "r") as config_file:
         config = yaml.safe_load(config_file)
 
-    default_interval = timedelta(**config['default_check_interval'])
-    next_checks = {target['name']: datetime.now()
-                   for target in config['targets']}
-    last_discovery = datetime.now() - timedelta(**
-                                                config['discovery']['interval'])
+    default_interval = timedelta(**config["default_check_interval"])
+    next_checks = {target["name"]: datetime.now()
+                   for target in config["targets"]}
+    last_discovery = datetime.now() - timedelta(**config["discovery"]["interval"])  # noqa: E501
 
     while True:
         now = datetime.now()
 
         # Run discovery if enabled and it's time
-        if config['discovery']['enabled'] and now - last_discovery >= timedelta(**config['discovery']['interval']):
+        if config["discovery"]["enabled"] and now - last_discovery >= timedelta(  # noqa: E501
+            **config["discovery"]["interval"]
+        ):
             logging.info("Running network discovery")
-            discovered_hosts = discover_hosts(config['discovery']['ip_ranges'])
+            discovered_hosts = discover_hosts(config["discovery"]["ip_ranges"])
             update_config(config, discovered_hosts)
             last_discovery = now
 
-        for target in config['targets']:
-            if now >= next_checks.get(target['name'], now):
+        for target in config["targets"]:
+            if now >= next_checks.get(target["name"], now):
                 result = check_target(target)
                 logging.info(f"Check result for {target['name']}: {result}")
                 update_home_assistant(
-                    config['home_assistant'], target['entity_id'], 'on' if result else 'off')
+                    config["home_assistant"],
+                    target["entity_id"],
+                    "on" if result else "off",
+                )
 
                 interval = get_interval(target, default_interval)
-                next_checks[target['name']] = now + interval
+                next_checks[target["name"]] = now + interval
                 logging.info(
-                    f"Next check for {target['name']} scheduled for {next_checks[target['name']]}")
+                    f"Next check for {target['name']} scheduled for {
+                        next_checks[target['name']]}"
+                )
 
         # Sleep for a short time before checking again
         time.sleep(10)
